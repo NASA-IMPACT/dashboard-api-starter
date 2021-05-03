@@ -1,4 +1,4 @@
-# covid-api
+# dashboard-api-starter
 
 A lightweight tile server for COVID data, based on [titiler](https://github.com/developmentseed/titiler).
 
@@ -12,8 +12,8 @@ First, add your AWS credentials to a new file called `.env`. You can see an exam
 ### Clone and configure
 
 ```bash
-git clone https://github.com/NASA-IMPACT/covid-api.git
-cd covid-api
+git clone https://github.com/NASA-IMPACT/dashboard-api-starter.git
+cd dashboard-api-starter
 
 # Add your AWS credentials to a new file called `.env`. You can see an example of this file at `.env.example`.
 cp .env.example .env

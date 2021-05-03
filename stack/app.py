@@ -33,9 +33,9 @@ DEFAULT_ENV = dict(
 )
 
 
-class covidApiLambdaStack(core.Stack):
+class dashboardApiLambdaStack(core.Stack):
     """
-    Covid API Lambda Stack
+    Dashboard Api Lambda Stack
 
     This code is freely adapted from
     - https://github.com/leothomas/titiler/blob/10df64fbbdd342a0762444eceebaac18d8867365/stack/app.py author: @leothomas
@@ -176,7 +176,7 @@ class covidApiLambdaStack(core.Stack):
         )
 
 
-class covidApiDatasetMetadataGeneratorStack(core.Stack):
+class dashboardApiDatasetMetadataGeneratorStack(core.Stack):
     """Dataset metadata generator stack - comprises a lambda and a Cloudwatch
     event that triggers a new lambda execution every 24hrs"""
 
@@ -277,7 +277,7 @@ for key, value in {
         core.Tag.add(app, key, value)
 
 lambda_stackname = f"{config.PROJECT_NAME}-lambda-{config.STAGE}"
-covidApiLambdaStack(
+dashboardApiLambdaStack(
     app,
     lambda_stackname,
     memory=config.MEMORY,
@@ -294,7 +294,7 @@ covidApiLambdaStack(
 dataset_metadata_generator_stackname = (
     f"{config.PROJECT_NAME}-dataset-metadata-generator-{config.STAGE}"
 )
-covidApiDatasetMetadataGeneratorStack(
+dashboardApiDatasetMetadataGeneratorStack(
     app,
     dataset_metadata_generator_stackname,
     dataset_metadata_filename=f"{config.STAGE}-dataset-metadata.json",
