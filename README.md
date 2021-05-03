@@ -112,13 +112,17 @@ This currently deploys 2 stacks.
 
 ```bash
 export AWS_PROFILE=CHANGEME
+# Note - the docker build is currently slow so this can take 5+ minutes to run 
 ./deploy.sh
 ```
 
 Deploy the dashboard!
 
 ```bash
-git clone git@github.com:NASA-IMPACT/covid-dashboard.git#abarciauskas-bgse_sample-app
-cd covid-dashboard
+# Suggest changing your parent directory for distinct repository organization
+cd ..
+git clone git@github.com:NASA-IMPACT/earthdata-dashboard-starter.git
+cd earthdata-dashboard-starter
+# configure the API_URL to be the same as returned from `./deploy.sh`
 API_URL=ADDME yarn deploy
 ```
