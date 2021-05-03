@@ -47,7 +47,7 @@ Test the api `open http://localhost:8000/v1/datasets`
 docker-compose up --build
 ```
 
-The API should be running on `http://localhost:8000`.
+Test the api `open http://localhost:8000/v1/datasets`
 
 ## Contribution & Development
 
