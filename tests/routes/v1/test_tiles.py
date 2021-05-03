@@ -16,7 +16,7 @@ def parse_img(content: bytes) -> Dict:
             return dst.meta
 
 
-@patch("covid_api.api.api_v1.endpoints.tiles.cogeo.rasterio")
+@patch("dashboard_api.api.api_v1.endpoints.tiles.cogeo.rasterio")
 def test_tile(rio, app):
     """test tile endpoints."""
     rio.open = mock_rio

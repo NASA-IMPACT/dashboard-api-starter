@@ -3,7 +3,7 @@
 import boto3
 from moto import mock_s3
 
-from covid_api.core.config import INDICATOR_BUCKET
+from dashboard_api.core.config import INDICATOR_BUCKET
 
 
 @mock_s3

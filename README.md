@@ -21,6 +21,8 @@ cp .env.example .env
 cp stack/config.yml.example stack/config.yml
 ```
 
+**IMPORTANT:** Create if needed and ensure access to the buckets configured in `stack/config.yml`.
+
 ### Running the app locally
 
 To run the app locally, generate a config file and generate the static dataset json files.
@@ -34,8 +36,10 @@ pip install -e .
 export AWS_PROFILE=CHANGEME
 python -m lambda.dataset_metadata_generator.src.main
 # Run the app
-uvicorn covid_api.main:app --reload
+uvicorn dashboard_api.main:app --reload
 ```
+
+Test the api `open http://localhost:8000/v1/datasets`
 
 ### Running the app with docker:
 
@@ -77,7 +81,7 @@ in `stack/config.yml` and / or listing datasets from an external `STAC_API_URL`.
 
 Metadata is used to list serve data via `/datasets`, `/tiles`, and `/timelapse` There are 2 possible sources of metadata for serving these resources.
 
-1. Static JSON files, stored in `covid_api/db/static/datasets/`
+1. Static JSON files, stored in `dashboard_api/db/static/datasets/`
 2. STAC API, defined in `stack/config.yml`
 
 In `lambda/dataset_metadata_generator` is code for a lambda to asynchronously generate metadata json files.

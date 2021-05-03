@@ -118,7 +118,7 @@ class dashboardApiLambdaStack(core.Stack):
         lambda_env = DEFAULT_ENV.copy()
         lambda_env.update(
             dict(
-                MODULE_NAME="covid_api.main",
+                MODULE_NAME="dashboard_api.main",
                 VARIABLE_NAME="app",
                 WORKERS_PER_CORE="1",
                 LOG_LEVEL="error",
@@ -192,7 +192,7 @@ class dashboardApiDatasetMetadataGeneratorStack(core.Stack):
         """Define stack."""
         super().__init__(scope, id, *kwargs)
 
-        base = os.path.abspath(os.path.join("covid_api", "db", "static"))
+        base = os.path.abspath(os.path.join("dashboard_api", "db", "static"))
         lambda_deployment_package_location = os.path.abspath(
             os.path.join(code_dir, "lambda", "dataset_metadata_generator")
         )

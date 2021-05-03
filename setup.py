@@ -1,4 +1,4 @@
-"""Setup covid_api."""
+"""Setup dashboard_api."""
 
 from setuptools import find_packages, setup
 
@@ -44,7 +44,7 @@ extra_reqs = {
 
 
 setup(
-    name="covid_api",
+    name="dashboard_api",
     version="0.5.0",
     description=u"",
     long_description=long_description,
@@ -60,11 +60,11 @@ setup(
     keywords="",
     author=u"Development Seed",
     author_email="info@developmentseed.org",
-    url="https://github.com/developmentseed/covid_api",
+    url="https://github.com/developmentseed/dashboard_api",
     license="MIT",
     packages=find_packages(exclude=["ez_setup", "examples", "tests"]),
     package_data={
-        "covid_api": ["templates/*.html", "templates/*.xml", "db/static/**/*.json"]
+        "dashboard_api": ["templates/*.html", "templates/*.xml", "db/static/**/*.json"]
     },
     include_package_data=True,
     zip_safe=False,

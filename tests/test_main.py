@@ -1,4 +1,4 @@
-"""Test covid_api.main.app."""
+"""Test dashboard_api.main.app."""
 
 
 def test_health(app):

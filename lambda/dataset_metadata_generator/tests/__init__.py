@@ -1,7 +1,7 @@
 """
 Dataset metadata generator lambda test class. This file contains dataset and site metadata
 used by the unit tests. The data in this file should be updated to reflect and modification
-in metadata content or format of the actual metadatda files (under `covid_api/db/static/`)
+in metadata content or format of the actual metadatda files (under `dashboard_api/db/static/`)
 """
 DATASETS = [
     {

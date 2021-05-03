@@ -7,7 +7,7 @@ from mock import patch
 from ...conftest import mock_rio
 
 
-@patch("covid_api.api.api_v1.endpoints.ogc.rasterio")
+@patch("dashboard_api.api.api_v1.endpoints.ogc.rasterio")
 def test_wmts(rio, app):
     """test wmts endpoints."""
     rio.open = mock_rio

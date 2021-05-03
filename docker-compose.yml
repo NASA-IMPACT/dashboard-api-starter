@@ -9,8 +9,8 @@ services:
       - "8000:8000"
     volumes:
       - type: bind
-        source: ./covid_api
-        target: /app/covid_api
+        source: ./dashboard_api
+        target: /app/dashboard_api
     environment:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
@@ -20,7 +20,7 @@ services:
       - GDAL_HTTP_MERGE_CONSECUTIVE_RANGES=YES
       - GDAL_HTTP_MULTIPLEX=YES
       - GDAL_HTTP_VERSION=2
-      - MODULE_NAME=covid_api.main
+      - MODULE_NAME=dashboard_api.main
       - MEMCACHE_HOST=memcached
       - MEMCACHE_USERNAME=myuser
       - MEMCACHE_PASSWORD=mypassword

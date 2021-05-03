@@ -1,1 +1,1 @@
-"""covid_api."""
+"""dashboard_api."""

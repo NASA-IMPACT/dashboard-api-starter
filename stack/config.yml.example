@@ -47,4 +47,4 @@ DATASET_METADATA_FILENAME: dev-dataset-metadata.json
 STAC_API_URL: https://earth-search.aws.element84.com/v0
 DATASETS:
   STATIC:
-  - MODIS13A1.006.json
+  - MOD13A1.006.json

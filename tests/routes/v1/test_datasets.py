@@ -8,7 +8,7 @@ import boto3
 import botocore
 from moto import mock_s3
 
-from covid_api.core.config import INDICATOR_BUCKET
+from dashboard_api.core.config import INDICATOR_BUCKET
 
 DATASET_METADATA_FILENAME = "dev-dataset-metadata.json"
 DATASET_METADATA_GENERATOR_FUNCTION_NAME = "dev-dataset-metadata-generator"
@@ -53,7 +53,7 @@ def test_metadata_file_generation_triggered_if_not_found(
 
     _setup_s3(empty=True)
 
-    with patch("covid_api.db.static.datasets.invoke_lambda") as mocked_invoke_lambda:
+    with patch("dashboard_api.db.static.datasets.invoke_lambda") as mocked_invoke_lambda:
 
         mocked_invoke_lambda.return_value = {"result": "success"}
         # Load dataset will invoke the mocked-lambda and then attempt to load the file

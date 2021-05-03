@@ -1,11 +1,11 @@
 FROM lambci/lambda:build-python3.7
 
 
-# We install covid_api and mangum
+# We install dashboard_api and mangum
 WORKDIR /app
 
 COPY README.md /app/README.md
-COPY covid_api/ /app/covid_api/
+COPY dashboard_api/ /app/dashboard_api/
 COPY setup.py /app/setup.py
 
 RUN pip install --upgrade pip

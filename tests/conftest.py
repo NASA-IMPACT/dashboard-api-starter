@@ -20,7 +20,7 @@ def aws_credentials(monkeypatch):
 def app() -> TestClient:
     """Make sure we use monkeypatch env."""
 
-    from covid_api.main import app
+    from dashboard_api.main import app
 
     return TestClient(app)
 
@@ -35,6 +35,6 @@ def mock_rio(src_path: str) -> DatasetReader:
 @pytest.fixture
 def dataset_manager(monkeypatch):
 
-    from covid_api.db.static.datasets import DatasetManager
+    from dashboard_api.db.static.datasets import DatasetManager
 
     return DatasetManager

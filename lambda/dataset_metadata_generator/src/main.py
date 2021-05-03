@@ -12,8 +12,8 @@ import boto3
 BASE_PATH = os.path.abspath('.')
 config = yaml.load(open(f"{BASE_PATH}/stack/config.yml", 'r'), Loader=yaml.FullLoader)
 
-DATASETS_JSON_FILEPATH = os.path.join(BASE_PATH, "covid_api/db/static/datasets")
-SITES_JSON_FILEPATH = os.path.join(BASE_PATH, "covid_api/db/static/sites")
+DATASETS_JSON_FILEPATH = os.path.join(BASE_PATH, "dashboard_api/db/static/datasets")
+SITES_JSON_FILEPATH = os.path.join(BASE_PATH, "dashboard_api/db/static/sites")
 
 DATASET_METADATA_FILENAME = os.environ.get("DATASET_METADATA_FILENAME", config.get('DATASET_METADATA_FILENAME'))
 STAC_API_URL = config['STAC_API_URL']
