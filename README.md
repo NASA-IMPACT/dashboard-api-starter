@@ -127,6 +127,7 @@ Deploy the dashboard!
 cd ..
 git clone git@github.com:NASA-IMPACT/earthdata-dashboard-starter.git
 cd earthdata-dashboard-starter
+nvm install
 # configure the API_URL to be the same as returned from `./deploy.sh`
-API_URL=ADDME yarn deploy
+API_URL=<REPLACE_ME> yarn deploy
 ```
