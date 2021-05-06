@@ -8,7 +8,7 @@ from typing import Dict, List
 import boto3
 from botocore import config
 
-from dashboard_api.core.config import DT_FORMAT, INDICATOR_BUCKET
+from dashboard_api.core.config import DT_FORMAT, BUCKET
 from dashboard_api.models.static import IndicatorObservation
 
 s3 = boto3.client("s3")
@@ -94,7 +94,7 @@ def get_indicator_site_metadata(identifier: str, folder: str) -> Dict:
     """Get Indicator metadata for a specific site."""
     try:
         key = f"indicators/{folder}/{identifier}.json"
-        return json.loads(s3_get(INDICATOR_BUCKET, key))
+        return json.loads(s3_get(BUCKET, key))
     except Exception:
         return {}
 
@@ -102,7 +102,7 @@ def get_indicator_site_metadata(identifier: str, folder: str) -> Dict:
 def indicator_folders() -> List:
     """Get Indicator folders."""
     response = s3.list_objects_v2(
-        Bucket=INDICATOR_BUCKET, Prefix="indicators/", Delimiter="/",
+        Bucket=BUCKET, Prefix="indicators/", Delimiter="/",
     )
     common_prefixes = response.get('CommonPrefixes')
     return [obj["Prefix"].split("/")[1] for obj in common_prefixes] if common_prefixes else []
@@ -111,13 +111,13 @@ def indicator_exists(identifier: str, indicator: str):
     """Check if an indicator exists for a site"""
     try:
         s3.head_object(
-            Bucket=INDICATOR_BUCKET, Key=f"indicators/{indicator}/{identifier}.csv",
+            Bucket=BUCKET, Key=f"indicators/{indicator}/{identifier}.csv",
         )
         return True
     except Exception:
         try:
             s3.head_object(
-                Bucket=INDICATOR_BUCKET,
+                Bucket=BUCKET,
                 Key=f"indicators/{indicator}/{identifier}.json",
             )
             return True
@@ -135,13 +135,13 @@ def get_indicators(identifier) -> List:
                 data = []
                 # metadata for reading the data and converting to a consistent format
                 metadata_json = s3_get(
-                    INDICATOR_BUCKET, f"indicators/{folder}/metadata.json"
+                    BUCKET, f"indicators/{folder}/metadata.json"
                 )
                 metadata_dict = json.loads(metadata_json.decode("utf-8"))
 
                 # read the actual indicator data
                 indicator_csv = s3_get(
-                    INDICATOR_BUCKET, f"indicators/{folder}/{identifier}.csv"
+                    BUCKET, f"indicators/{folder}/{identifier}.csv"
                 )
                 indicator_lines = indicator_csv.decode("utf-8").split("\n")
                 reader = csv.DictReader(indicator_lines,)

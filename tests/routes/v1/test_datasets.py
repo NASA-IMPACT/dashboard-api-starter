@@ -8,7 +8,7 @@ import boto3
 import botocore
 from moto import mock_s3
 
-from dashboard_api.core.config import INDICATOR_BUCKET
+from dashboard_api.core.config import BUCKET
 
 DATASET_METADATA_FILENAME = "dev-dataset-metadata.json"
 DATASET_METADATA_GENERATOR_FUNCTION_NAME = "dev-dataset-metadata-generator"
@@ -17,7 +17,7 @@ DATASET_METADATA_GENERATOR_FUNCTION_NAME = "dev-dataset-metadata-generator"
 @mock_s3
 def _setup_s3(empty=False):
     s3 = boto3.resource("s3")
-    bucket = s3.Bucket(INDICATOR_BUCKET)
+    bucket = s3.Bucket(BUCKET)
     bucket.create()
     if empty:
         return bucket
