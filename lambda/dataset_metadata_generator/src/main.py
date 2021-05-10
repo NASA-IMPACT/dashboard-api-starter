@@ -9,11 +9,13 @@ import yaml
 
 import boto3
 
+from rio_tiler.io import COGReader
+from cogeo_mosaic.mosaic import MosaicJSON
+
 BASE_PATH = os.path.abspath('.')
 config = yaml.load(open(f"{BASE_PATH}/stack/config.yml", 'r'), Loader=yaml.FullLoader)
 
 DATASETS_JSON_FILEPATH = os.path.join(BASE_PATH, "dashboard_api/db/static/datasets")
-SITES_JSON_FILEPATH = os.path.join(BASE_PATH, "dashboard_api/db/static/sites")
 
 DATASET_METADATA_FILENAME = os.environ.get("DATASET_METADATA_FILENAME", config.get('DATASET_METADATA_FILENAME'))
 STAC_API_URL = config['STAC_API_URL']
@@ -24,7 +26,7 @@ bucket = s3.Bucket(os.environ.get("DATA_BUCKET_NAME", config.get('BUCKET')))
 DT_FORMAT = "%Y-%m-%d"
 MT_FORMAT = "%Y%m"
 
-# Can test this with python -m lambda.dataset_metadata_generator.src.main | jq .
+# Can test this with ENV=local python -m lambda.dataset_metadata_generator.src.main | jq .
 # From the root directory of this project.
 def handler(event, context):
     """
@@ -41,53 +43,123 @@ def handler(event, context):
     (string): JSON-encoded dict with top level keys for each of the possible
         queries that can be run against the `/datasets` endpoint (key: _all_ contains
         result of the LIST operation, each of other keys contain the result of
-        GET /datasets/{spotlight_id | "global"})
+        GET /datasets/global)
     """
 
     # TODO: defined TypedDicts for these!
-    listed_datasets = config['DATASETS']['STATIC']
-    datasets = _gather_json_data(DATASETS_JSON_FILEPATH, filter=listed_datasets)
-    if STAC_API_URL:
-        stac_datasets = _fetch_stac_items()
-        datasets.extend(stac_datasets)
-    sites = _gather_json_data(SITES_JSON_FILEPATH)
+    datasets_to_parse = config['DATASETS']
+    datasets = _gather_dataset_configurations(DATASETS_JSON_FILEPATH, selections=datasets_to_parse)
 
-    result = _gather_datasets_metadata(datasets, sites)
+    # TODO: only use items which can be visualized
+    # if STAC_API_URL:
+    #     stac_datasets = _fetch_stac_items()
+    #     datasets.extend(stac_datasets)
+
+    result = _gather_datasets_metadata(datasets)
     # TODO: Protect from running _not_ in "production" deployment
-    bucket.put_object(
-        Body=json.dumps(result), Key=DATASET_METADATA_FILENAME, ContentType="application/json",
-    )
+    # bucket.put_object(
+    #     Body=json.dumps(result), Key=DATASET_METADATA_FILENAME, ContentType="application/json",
+    # )
+    if os.environ.get('ENV') == 'local':
+        print('IN LOCAL')
+        with open('example-dataset-metadata.json', 'w') as f:
+            f.write(json.dumps(result, indent=2))
+            f.close()
     return result
 
-def _fetch_stac_items():
-    """ Fetches collections from a STAC catalogue and generates a metadata object for each collection. """
-    stac_response = requests.get(f"{STAC_API_URL}/collections")
-    if stac_response.status_code == 200:
-        stac_collections = json.loads(stac_response.content).get('collections')
-    stac_datasets = []
-    for collection in stac_collections:
-        # TODO: defined TypedDicts for these!
-        stac_dataset = {
-            "id": collection['id'],
-            "name": collection['title'],
+def _dateset_metadata_template():
+    return {
+        "id": "",
+        "name": "",
+        "type": "raster",
+        "time_unit": "",
+        "is_periodic": Flase,
+        "source": {
             "type": "raster",
-            "time_unit": "day",
-            "is_periodic": False,
-            "source": {
-                "type": "raster",
-                # For now, don't list any tiles. We will want to mosaic STAC search results.
-                "tiles": []
-            },
-            "info": collection['description'],
+            # For now, don't list any tiles. We will want to mosaic STAC search results.
+            "tiles": []
+        },
+        "info": "",
+    }
+
+TITILER_ENDPOINT = "https://api.cogeo.xyz"
+username = "aimee-dashboard-api"
+
+def create_token():
+    r = requests.post(
+        f"{TITILER_ENDPOINT}/tokens/create",
+        json={
+            "username": username,
+            "scope": ["mosaic:read", "mosaic:create"]
         }
-        stac_datasets.append(stac_dataset)
+    ).json()
+    return r["token"]
 
-    return stac_datasets
+def post_mosaic(mosaicdata, token, layername):
+    r = requests.post(
+        f"{TITILER_ENDPOINT}/mosaicjson/upload",
+        json={
+            "username": username,
+            "layername": layername,
+            "mosaic": mosaicdata.dict(exclude_none=True),
+            "overwrite": True
+        },
+        params={
+            "access_token": token,
+        }
+    )
+    return r.json()
 
-def _gather_datasets_metadata(datasets: List[dict], sites: List[dict]):
-    """Reads through the s3 bucket to generate a file that contains
-    the datasets for each given spotlight option (_all, global, tk, ny, sf,
-    la, be, du, gh) and their respective domain for each spotlight
+
+def _create_mosaic_layer(stac_endpoint, collection_id):
+    items = requests.get(stac_endpoint).json()
+    features = items['features']
+    # Creating a mosaic using cogeo_mosaic requires a path property
+    for feature in features:
+        # note this could be "assets: browse:" for STAC CMR :/
+        feature['properties']['path'] = feature['assets']['visual']['href']
+    now = datetime.datetime.now()
+    first_cog = features[0]['assets']['visual']['href']
+    with COGReader(first_cog) as cog:
+        info = cog.info()
+    # We are creating the mosaicJSON using the features we created earlier
+    # by default MosaicJSON.from_feature will look in feature.properties.path to get the path of the dataset
+    layername = f"{collection_id}_{now.strftime('%Y%m%d%H%M%S')}"
+    mosaicdata = MosaicJSON.from_features(features, minzoom=info.minzoom, maxzoom=info.maxzoom)
+    token = create_token()
+    response = post_mosaic(mosaicdata, token, layername)
+    layer = response['mosaic']
+    r = requests.get(
+        f"{TITILER_ENDPOINT}/mosaicjson/{username}.{layername}/tilejson.json",
+    ).json()
+    return r["tiles"][0]
+
+
+# def _fetch_stac_items():
+#     """ Fetches collections from a STAC catalogue and generates a metadata object for each collection. """
+#     stac_response = requests.get(f"{STAC_API_URL}/collections")
+#     if stac_response.status_code == 200:
+#         stac_collections = json.loads(stac_response.content).get('collections')
+#     stac_datasets = []
+#     for collection in stac_collections:
+#         # TODO: defined TypedDicts for these!
+
+#         stac_dataset = _dateset_metadata_template.copy()
+#         stac_dataset['id'] = collection['id']
+#         stac_dataset['name'] = collection['title']
+#         # TODO: pull dynamically
+#         stac_dataset['time_unit'] = "day"
+#         stac_dataset['info'] = collection['description']
+#         stac_dataset['source'] = {
+#             "type": "raster",
+#             "tiles": [ "{api_url}/{z}/{x}/{y}@1x?url={tif_location}&resampling_method=nearest&bidx=1&rescale=-0.20000000298023224%2C0.9945999979972839&color_map=gist_earth" ]
+#         }
+#         stac_datasets.append(stac_dataset)
+
+#     return stac_datasets
+
+def _gather_datasets_metadata(datasets: List[dict]):
+    """Reads through the s3 bucket to generate the respective time domain
 
     Params:
     -------
@@ -95,7 +167,6 @@ def _gather_datasets_metadata(datasets: List[dict], sites: List[dict]):
         like: s3_location, time_unit, swatch, exclusive_with, etc), to use
         to generate the result of each of the possible `/datasets` endpoint
         queries.
-    sites (List[dict]): list of site metadata objects
 
     Returns:
     --------
@@ -104,7 +175,6 @@ def _gather_datasets_metadata(datasets: List[dict], sites: List[dict]):
     """
 
     metadata: Dict[str, dict] = {}
-
     for dataset in datasets:
         if dataset.get("s3_location"):
             domain_args = {
@@ -115,64 +185,33 @@ def _gather_datasets_metadata(datasets: List[dict], sites: List[dict]):
             }
             domain = _get_dataset_domain(**domain_args)
             dataset['domain'] = domain
-        
+        if dataset.get("source") and dataset.get("source").get("type") == 'STAC':
+            # create mosaic using parameters
+            stac_endpoint = f"{dataset.get('source').get('endpoint')}?"
+            for param in dataset.get("source").get("params").items():
+                stac_endpoint = f"{stac_endpoint}&{param[0]}={param[1]}"
+            mosaic_tiles_url = _create_mosaic_layer(stac_endpoint, dataset.get('id'))
+            dataset['source']['type'] = 'raster'
+            dataset['source']['tiles'] = [ mosaic_tiles_url ]
         metadata.setdefault("_all", {}).update({dataset["id"]: dataset})
-
-        if _is_global_dataset(dataset):
-
-            metadata.setdefault("global", {}).update(
-                {dataset["id"]: dataset}
-            )
-            continue
-
-        for site in sites:
-
-            domain_args["spotlight_id"] = site["id"]
-
-            if site["id"] in ["du", "gh"]:
-                domain_args["spotlight_id"] = ["du", "gh", "EUPorts"]
-
-            # skip adding dataset to metadata object if no dates were found for the given
-            # spotlight (indicates dataset is not valid for that spotlight)
-            try:
-                domain = _get_dataset_domain(**domain_args)
-            except NoKeysFoundForSpotlight:
-                continue
-
-            metadata.setdefault(site["id"], {}).update(
-                {dataset["id"]: {"domain": domain}}
-            )
     return metadata
 
 
-def _gather_json_data(dirpath: str, filter: List[str] = None) -> List[dict]:
+def _gather_dataset_configurations(dirpath: str, selections: List[str] = None) -> List[dict]:
     """Gathers all JSON files from within a diven directory"""
 
     results = []
     for filename in os.listdir(dirpath):
-        if not filename.endswith(".json"):
-            continue
-        if filter and not filename in filter:
-            continue
-        with open(os.path.join(dirpath, filename)) as f:
-            results.append(json.load(f))
+        if filename in selections:
+            with open(os.path.join(dirpath, filename)) as f:
+                if filename.endswith(".json"):
+                    results.append(json.load(f))
+                if filename.endswith(".yml"):
+                    results.append(yaml.load(f, Loader=yaml.FullLoader))
     return results
 
 
-def _is_global_dataset(dataset: dict) -> bool:
-    """Returns whether the given dataset is spotlight specific (FALSE)
-    or non-spotlight specific (TRUE)"""
-    return not any(
-        [
-            i in dataset["source"]["tiles"][0]
-            for i in ["{spotlightId}", "greatlakes", "togo"]
-            if dataset['source']['tiles']
-        ]
-    )
-
-
 def _gather_s3_keys(
-    spotlight_id: Optional[Union[str, List]] = None,
     prefix: Optional[str] = "",
     dataset_bucket: Optional[str] = None
 ) -> List[str]:
@@ -181,8 +220,6 @@ def _gather_s3_keys(
     the entire S3 bucket.
     Params:
     -------
-    spotlight_id (Optional[str]):
-        Id of a spotlight to filter keys by
     prefix (Optional[str]):
         S3 Prefix under which to gather keys, used to specifcy a specific
         dataset folder to search within.
@@ -196,21 +233,13 @@ def _gather_s3_keys(
 
     keys = [x.key for x in s3_dataset_bucket.objects.filter(Prefix=prefix)]
 
-    if not spotlight_id:
-        return keys
-
-    if isinstance(spotlight_id, list):
-        spotlight_id = "|".join([s for s in spotlight_id])
-
-    pattern = re.compile(rf"""[^a-zA-Z0-9]({spotlight_id})[^a-zA-Z0-9]""")
-    return list({key for key in keys if pattern.search(key, re.IGNORECASE,)})
+    return keys
 
 
 def _get_dataset_domain(
     dataset_folder: str,
     is_periodic: bool,
     dataset_bucket: Optional[str] = None,
-    spotlight_id: Optional[Union[str, List]] = None,
     time_unit: Optional[str] = "day",
 ):
     """
@@ -223,9 +252,6 @@ def _get_dataset_domain(
     ------
     dataset_folder (str): dataset folder to search within
     time_unit (Optional[str]): time_unit from the dataset's metadata json file
-    spotlight_id (Optional[str]): a dictionary containing the
-        `spotlight_id` of a spotlight to restrict the
-        domain search to.
     time_unit (Optional[str] - one of ["day", "month"]):
         Wether the {date} object in the S3 filenames should be matched
         to YYYY_MM_DD (day) or YYYYMM (month)
@@ -235,17 +261,12 @@ def _get_dataset_domain(
     List[datetime]
     """
     s3_keys_args: Dict[str, Any] = {"prefix": dataset_folder}
-    if spotlight_id:
-        s3_keys_args["spotlight_id"] = spotlight_id
     if dataset_bucket:
         s3_keys_args['dataset_bucket'] = dataset_bucket
 
-    keys = _gather_s3_keys(**s3_keys_args)
-    if not keys:
-        raise NoKeysFoundForSpotlight
-
     dates = []
 
+    keys = _gather_s3_keys(**s3_keys_args)
     for key in keys:
 
         # matches either dates like: YYYYMM or YYYY_MM_DD
@@ -288,11 +309,6 @@ def _get_dataset_domain(
 
     return sorted(set(dates))
 
-
-class NoKeysFoundForSpotlight(Exception):
-    """Exception to be thrown if no keys are found for a given spotlight"""
-
-    pass
 
 if __name__ == "__main__":
     json.dumps(handler({}, {}))

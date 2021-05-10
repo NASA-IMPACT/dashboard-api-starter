@@ -37,7 +37,6 @@ class DatasetManager(object):
                 s3_get(bucket=INDICATOR_BUCKET, key=DATASET_METADATA_FILENAME)
             )
         except botocore.errorfactory.ClientError as e:
-
             if e.response["Error"]["Code"] == "NoSuchKey":
                 print(
                     "No datasets domain metadata file found, requesting generation"
@@ -48,16 +47,14 @@ class DatasetManager(object):
                 # "Payload" returned by the lambda_invocation (see docstring).
                 # Instead the thread is held while the lambda executes and then
                 # loads the metadata from s3.
-                try:
-                    invoke_lambda(
-                        lambda_function_name=DATASET_METADATA_GENERATOR_FUNCTION_NAME
-                    )
-                    return json.loads(
-                        s3_get(bucket=INDICATOR_BUCKET, key=DATASET_METADATA_FILENAME)
-                    )
-                except botocore.errorfactory.ClientError as e:
-                    if e.response["Error"]["Code"] == "ResourceNotFoundException":
-                        return json.loads(open("example-dataset-metadata.json").read())
+                invoke_lambda(
+                    lambda_function_name=DATASET_METADATA_GENERATOR_FUNCTION_NAME
+                )
+                return json.loads(
+                    s3_get(bucket=INDICATOR_BUCKET, key=DATASET_METADATA_FILENAME)
+                )
+            else:
+                return json.loads(open("example-dataset-metadata.json").read())
 
     def get(self, spotlight_id: str, api_url: str) -> Datasets:
         """
