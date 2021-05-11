@@ -57,9 +57,9 @@ def handler(event, context):
 
     result = _gather_datasets_metadata(datasets)
     # TODO: Protect from running _not_ in "production" deployment
-    # bucket.put_object(
-    #     Body=json.dumps(result), Key=DATASET_METADATA_FILENAME, ContentType="application/json",
-    # )
+    bucket.put_object(
+        Body=json.dumps(result), Key=DATASET_METADATA_FILENAME, ContentType="application/json",
+    )
     if os.environ.get('ENV') == 'local':
         print('IN LOCAL')
         with open('example-dataset-metadata.json', 'w') as f:
