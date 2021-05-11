@@ -22,11 +22,17 @@ jobs:
           to_file: 'stack/config.yml'
           commit: 'false'
 
-      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
-      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: List files in the repository
-        run: |
-          ls ${{ github.workspace }}
-          ls ${{ github.workspace }}/stack
-          cat ${{ github.workspace }}/stack/config.yml
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install jq
+        run: sudo apt-get install jq
+
+      - name: Install AWS CDK, pip requirements and run CDK bootstrap
+        run: ./install.sh
+
+      - name: Deploy the resources to AWS
+        run: ./deploy.sh
+      
       - run: echo "🍏 This job's status is ${{ job.status }}."
