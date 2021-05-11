@@ -3,13 +3,13 @@
 import boto3
 from moto import mock_s3
 
-from dashboard_api.core.config import INDICATOR_BUCKET
+from dashboard_api.core.config import BUCKET
 
 
 @mock_s3
 def _setup_s3():
     s3 = boto3.resource("s3")
-    bucket = s3.Bucket(INDICATOR_BUCKET)
+    bucket = s3.Bucket(BUCKET)
     bucket.create()
     s3_keys = [
         ("indicators/test/super.csv", b"test"),

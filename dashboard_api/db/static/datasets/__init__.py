@@ -7,7 +7,7 @@ import botocore
 
 from dashboard_api.core.config import (DATASET_METADATA_FILENAME,
                                    DATASET_METADATA_GENERATOR_FUNCTION_NAME,
-                                   INDICATOR_BUCKET)
+                                   BUCKET)
 from dashboard_api.db.static.errors import InvalidIdentifier
 from dashboard_api.db.static.sites import sites
 from dashboard_api.db.utils import invoke_lambda, s3_get
@@ -34,7 +34,7 @@ class DatasetManager(object):
     def _load_metadata_from_file(self):
         try:
             return json.loads(
-                s3_get(bucket=INDICATOR_BUCKET, key=DATASET_METADATA_FILENAME)
+                s3_get(bucket=BUCKET, key=DATASET_METADATA_FILENAME)
             )
         except botocore.errorfactory.ClientError as e:
 
@@ -53,10 +53,10 @@ class DatasetManager(object):
                         lambda_function_name=DATASET_METADATA_GENERATOR_FUNCTION_NAME
                     )
                     return json.loads(
-                        s3_get(bucket=INDICATOR_BUCKET, key=DATASET_METADATA_FILENAME)
+                        s3_get(bucket=BUCKET, key=DATASET_METADATA_FILENAME)
                     )
                 except botocore.errorfactory.ClientError as e:
-                    if e.response["Error"]["Code"] == "ResourceNotFoundException":
+                    if e.response["Error"]["Code"] in ["ResourceNotFoundException", "NoSuchKey"]:
                         return json.loads(open("example-dataset-metadata.json").read())
 
     def get(self, spotlight_id: str, api_url: str) -> Datasets:
