@@ -28,4 +28,5 @@ jobs:
         run: |
           ls ${{ github.workspace }}
           ls ${{ github.workspace }}/stack
+          cat ${{ github.workspace }}/stack/config.yml
       - run: echo "🍏 This job's status is ${{ job.status }}."
