@@ -1,7 +1,7 @@
-name: GitHub Actions Demo
+name: Deploy
 on: [push]
 jobs:
-  Explore-GitHub-Actions:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS credentials from MAAP AWS Account
