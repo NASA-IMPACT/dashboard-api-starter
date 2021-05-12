@@ -29,6 +29,9 @@ jobs:
       - name: Install jq
         run: sudo apt-get install jq
 
+      - name: Print the aws region
+        run: echo $AWS_REGION
+
       - name: Install AWS CDK, pip requirements and run CDK bootstrap
         run: ./install.sh
 
