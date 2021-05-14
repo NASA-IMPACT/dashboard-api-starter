@@ -1,5 +1,8 @@
 name: Deploy
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 env:
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
