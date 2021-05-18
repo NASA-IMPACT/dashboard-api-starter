@@ -1,7 +1,7 @@
 PROJECT_NAME: eo-lab-project
 STAGE: dev
 # UPDATE ME: primary bucket
-BUCKET: data-bucket
+BUCKET: ${DATA_BUCKET}
 
 # Additional environement variable to set in the task/lambda
 TASK_ENV:
