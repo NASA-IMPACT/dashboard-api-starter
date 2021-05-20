@@ -63,12 +63,12 @@ async def cache_middleware(request: Request, call_next):
 
 @app.get(
     "/",
-    responses={200: {"content": {"application/hmtl": {}}}},
+    responses={200: {"content": {"text/html": {}}}},
     response_class=HTMLResponse,
 )
 @app.get(
     "/index.html",
-    responses={200: {"content": {"application/hmtl": {}}}},
+    responses={200: {"content": {"text/html": {}}}},
     response_class=HTMLResponse,
 )
 def index(request: Request):
@@ -86,7 +86,7 @@ def index(request: Request):
 
 @app.get(
     "/simple_viewer.html",
-    responses={200: {"content": {"application/hmtl": {}}}},
+    responses={200: {"content": {"text/html": {}}}},
     response_class=HTMLResponse,
 )
 def simple(request: Request):
