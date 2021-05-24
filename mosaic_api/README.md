@@ -102,15 +102,3 @@ export AWS_PROFILE=CHANGEME
 # Note - the docker build is currently slow so this can take 5+ minutes to run 
 ./deploy.sh
 ```
-
-Deploy the dashboard!
-
-```bash
-# Suggest changing your parent directory for distinct repository organization
-cd ..
-git clone git@github.com:MAAP-Project/earthdata-dashboard-starter.git
-cd earthdata-dashboard-starter
-nvm install
-# configure the API_URL to be the same (you might need to add `v1/` at the end) as returned from `./deploy.sh`
-API_URL=<REPLACE_ME> yarn deploy
-```
