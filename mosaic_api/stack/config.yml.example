@@ -1,0 +1,21 @@
+PROJECT_NAME: eo-lab-project
+STAGE: dev
+MOSAIC_API_ROOT: https://api.cogeo.xyz
+
+# Additional environement variable to set in the task/lambda
+TASK_ENV:
+# Existing VPC to point ECS/LAMBDA stacks towards. Defaults to creating a new
+# VPC if no ID is supplied.
+VPC_ID:
+
+################################################################################
+#                                                                              #
+#                                 LAMBDA                                       #
+#                                                                              #
+################################################################################
+TIMEOUT: 10
+MEMORY: 1536
+
+# stack skips setting concurrency if this value is 0
+# the stack will instead use unreserved lambda concurrency
+MAX_CONCURRENT: 0
