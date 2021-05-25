@@ -15,7 +15,7 @@ inst_reqs = [
     "aiohttp[speedups]"
 ]
 extra_reqs = {
-    "dev": ["pytest", "pytest-cov", "pytest-asyncio", "pre-commit"],
+    "dev": ["pytest", "pytest-cov", "pytest-asyncio", "pytest-mock", "pre-commit"],
     "server": ["uvicorn", "click==7.0"],
     "deploy": [
         "docker",

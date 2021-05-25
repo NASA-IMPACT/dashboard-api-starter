@@ -68,12 +68,20 @@ async def post_mosaics(
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                                 detail=f"Error: timeout executing STAC API search")
 
+        if not features:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                                detail=f"Error: STAC API Search returned no results")
+
         try:
             # 20 seconds should be enough to read the info from a COG, but may take longer on a non-COG
             mosaic_data = await wait_for(loop.run_in_executor(None, extract_mosaic_data, features), 20)
         except asyncio.TimeoutError:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                                 detail=f"Error: timeout reading a COG asset and generating MosaicJSON definition")
+
+        if mosaic_data is None:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                                detail=f"Error: could not extract mosaic data")
 
         try:
             token = await wait_for(retrieve_token(mosaic_request.username), 5)
@@ -91,6 +99,8 @@ async def post_mosaics(
 
         return _mosaic(mosaic_id)
 
+    except HTTPException as e:
+        raise e
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error: {e}")
 
