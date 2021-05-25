@@ -4,6 +4,7 @@ import pytest
 import json
 from starlette import status
 
+
 @pytest.fixture
 def mock_mosaic_api_root(monkeypatch):
     monkeypatch.setenv("MOSAIC_API_ROOT", "http://example.com")

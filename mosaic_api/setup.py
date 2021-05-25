@@ -6,12 +6,13 @@ with open("README.md") as f:
     long_description = f.read()
 
 inst_reqs = [
-    "fastapi==0.60.0",
-    "requests",
+    "fastapi~=0.65.0",
     "pyyaml",
     "pystac-client~=0.1.1",
     "cogeo-mosaic~=3.0.0",
-    "stac_pydantic" # inherit from pystac-client
+    "stac_pydantic", # inherit version from pystac-client
+    "aiohttp~=3.7.4",
+    "aiohttp[speedups]"
 ]
 extra_reqs = {
     "dev": ["pytest", "pytest-cov", "pytest-asyncio", "pre-commit"],

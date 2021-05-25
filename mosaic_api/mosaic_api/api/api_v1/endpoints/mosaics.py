@@ -5,13 +5,13 @@ import string
 from fastapi import APIRouter, Response, HTTPException
 from starlette import status
 from starlette.requests import Request
-import requests
 from cogeo_mosaic.mosaic import MosaicJSON
 from rio_tiler.io import COGReader
 from pystac_client import Client
 from typing import List, Optional
 from asyncio import wait_for, create_task
 import asyncio
+import aiohttp
 
 from mosaic_api.core.config import MOSAIC_API_ROOT
 
@@ -21,7 +21,7 @@ router = APIRouter()
 @router.get(
     "/mosaics/{mosaic_id}",
     responses={
-        200: { "description":"return mosaic for a given ID"}
+        200: {"description": "return mosaic for a given ID"}
     },
     response_model=Mosaic,
 )
@@ -49,59 +49,76 @@ async def post_mosaics(
     """Create a mosaic for the given parameters"""
 
     if not mosaic_request.username:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error: username parameter must be defined.")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"Error: username parameter must be defined.")
 
     if not mosaic_request.stac_api_root:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error: stac_api_root parameter must be defined.")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"Error: stac_api_root parameter must be defined.")
 
     # titiler requires layername to be <=32 chars
     layername = ''.join(random.choice(string.ascii_letters) for _ in range(32))
 
+    loop = asyncio.get_running_loop()
+
     try:
-        task_token = create_task(retrieve_token(mosaic_request.username))
+        try:
+            features = await wait_for(loop.run_in_executor(None, execute_stac_search, mosaic_request), 10)
+        except asyncio.TimeoutError:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                                detail=f"Error: timeout executing STAC API search")
 
-        features = await wait_for(execute_stac_search(mosaic_request), 10)
+        try:
+            # 20 seconds should be enough to read the info from a COG, but may take longer on a non-COG
+            mosaic_data = await wait_for(loop.run_in_executor(None, extract_mosaic_data, features), 20)
+        except asyncio.TimeoutError:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                                detail=f"Error: timeout reading a COG asset and generating MosaicJSON definition")
 
-        mosaic_data = await wait_for(extract_mosaic_data(features), 20)
+        try:
+            token = await wait_for(retrieve_token(mosaic_request.username), 5)
+        except asyncio.TimeoutError:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail=f"Error: timeout getting mosaicer access token")
 
-        token = await wait_for(task_token, 5)
-
-        mosaic_id = await wait_for(create_mosaic_remote(layername, mosaic_request.username, token, mosaic_data), 5)
+        try:
+            mosaic_id = await wait_for(create_mosaic_remote(layername, mosaic_request.username, token, mosaic_data), 5)
+        except asyncio.TimeoutError:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail=f"Error: timeout creating mosaic in mosaicer service")
 
         response.headers["Location"] = f"{request.url.scheme}://{request.headers['host']}/v1/mosaics/{mosaic_id}"
 
         return _mosaic(mosaic_id)
-    except asyncio.TimeoutError as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error: timeout: {e}")
+
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error: {e}")
 
 
-async def create_mosaic_remote(layername: str, username: str, token: str, mosaic_data) -> requests.Response:
+async def create_mosaic_remote(layername: str, username: str, token: str, mosaic_data) -> str:
     mosaic_api_uri = f"{MOSAIC_API_ROOT}/mosaicjson/upload"
+    req_body = {
+        "username": username,
+        "layername": layername,
+        "mosaic": mosaic_data.dict(exclude_none=True),
+        "overwrite": True
+    }
+    req_params = {
+        "access_token": token,
+    }
     try:
-        r = requests.post(
-            mosaic_api_uri,
-            json={
-                "username": username,
-                "layername": layername,
-                "mosaic": mosaic_data.dict(exclude_none=True),
-                "overwrite": True
-            },
-            params={
-                "access_token": token,
-            }
-        )
-        if r.status_code == status.HTTP_200_OK:
-            return r.json()['mosaic']
-        else:
-            raise Exception(f"Non-200 creating mosaic layer: {r.status_code} {r.text}")
+        async with aiohttp.ClientSession() as session:
+            async with session.post(mosaic_api_uri, json=req_body, params=req_params) as r:
+                if r.status == status.HTTP_200_OK:
+                    return (await r.json())['mosaic']
+                else:
+                    raise Exception(f"Non-200 creating mosaic layer: {r.status} {(await r.text())[:1024]}")
     except Exception as e:
         raise Exception(f"Error creating mosaic on {mosaic_api_uri}: {e}")
 
 
 # assumes all assets are uniform. get the min and max zoom from the first.
-async def extract_mosaic_data(features: List[dict]) -> Optional[MosaicJSON]:
+def extract_mosaic_data(features: List[dict]) -> Optional[MosaicJSON]:
     if features:
         try:
             with COGReader(visual_asset_href(features[0])) as cog:
@@ -120,23 +137,22 @@ async def extract_mosaic_data(features: List[dict]) -> Optional[MosaicJSON]:
 
 async def retrieve_token(username: str) -> str:
     token_uri = f"{MOSAIC_API_ROOT}/tokens/create"
+    req_body = {
+        "username": username,
+        "scope": ["mosaic:read", "mosaic:create"]
+    }
     try:
-        r = requests.post(
-            token_uri,
-            json={
-                "username": username,
-                "scope": ["mosaic:read", "mosaic:create"]
-            }
-        )
-        if r.status_code == status.HTTP_200_OK:
-            return r.json()["token"]
-        else:
-            raise Exception(f"Non-200 retrieiving token: {r.status_code}")
+        async with aiohttp.ClientSession() as session:
+            async with session.post(token_uri, json=req_body) as r:
+                if r.status == status.HTTP_200_OK:
+                    return (await r.json())['token']
+                else:
+                    raise Exception(f"Non-200 retrieving token : {r.status} {(await r.text())[:1024]}")
     except Exception as e:
         raise Exception(f"Error retrieving token from {token_uri}: {e}")
 
 
-async def execute_stac_search(mosaic_request: MosaicRequest) -> List[dict]:
+def execute_stac_search(mosaic_request: MosaicRequest) -> List[dict]:
     try:
         return Client.open(mosaic_request.stac_api_root).search(
             ids=mosaic_request.ids,
@@ -145,7 +161,7 @@ async def execute_stac_search(mosaic_request: MosaicRequest) -> List[dict]:
             bbox=mosaic_request.bbox,
             intersects=mosaic_request.intersects,
             query=mosaic_request.query,
-            max_items=1000, # todo: should this be a parameter? should an error be returned if more than 1000 in query?
+            max_items=1000,  # todo: should this be a parameter? should an error be returned if more than 1000 in query?
             limit=500
             # setting limit to a higher value causes an error https://github.com/stac-utils/pystac-client/issues/56
         ).items_as_collection().to_dict()['features']
