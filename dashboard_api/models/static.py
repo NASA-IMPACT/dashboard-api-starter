@@ -84,7 +84,6 @@ class Paint(BaseModel):
     circle_color: Optional[dict]
     circle_stroke_color: Optional[str]
 
-
     class Config:
         """Paint Model Config"""
 

@@ -7,7 +7,8 @@ import botocore
 
 from dashboard_api.core.config import (DATASET_METADATA_FILENAME,
                                    DATASET_METADATA_GENERATOR_FUNCTION_NAME,
-                                   BUCKET)
+                                   BUCKET,
+                                   VECTOR_TILESERVER_URL)
 from dashboard_api.db.static.errors import InvalidIdentifier
 from dashboard_api.db.static.sites import sites
 from dashboard_api.db.utils import invoke_lambda, s3_get
@@ -32,7 +33,7 @@ class DatasetManager(object):
         }
 
     def _load_metadata_from_file(self):
-        return json.loads(open("example-dataset-metadata.json").read())
+        # return json.loads(open("example-dataset-metadata.json").read())
         try:
             s3_datasets = json.loads(
                 s3_get(bucket=BUCKET, key=DATASET_METADATA_FILENAME)
@@ -132,7 +133,11 @@ class DatasetManager(object):
                 )
                 for tile in tiles
             ]
-        return [tile.replace("{api_url}", api_url) for tile in tiles]
+        return [
+            tile.replace("{api_url}", api_url) and
+            tile.replace("{vector_tileserver_url}", VECTOR_TILESERVER_URL)
+            for tile in tiles
+            ]
 
     def _process(
         self, datasets_domains_metadata: dict, api_url: str, spotlight_id: str = None

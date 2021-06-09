@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - abarciauskas-bgse_add-atl08
 
 env:
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
@@ -24,7 +25,11 @@ jobs:
 
       - uses: franzbischoff/replace_envs@v1
         env:
+          PROJECT_NAME: 'maap'
           DATA_BUCKET: 'earthdata-dashboard'
+          STAGE: 'dit'
+          STAC_API_URL: ''
+          VECTOR_TILESERVER_URL: 'http://ec2-3-89-226-195.compute-1.amazonaws.com:8080'
         with:
           from_file: 'stack/config.yml.example'
           to_file: 'stack/config.yml'
