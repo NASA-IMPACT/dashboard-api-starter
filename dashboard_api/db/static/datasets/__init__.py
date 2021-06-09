@@ -33,7 +33,11 @@ class DatasetManager(object):
         }
 
     def _load_metadata_from_file(self):
-        # return json.loads(open("example-dataset-metadata.json").read())
+        if os.environ.get('ENV') == 'local':
+            # Useful for local testing
+            example_datasets = "example-dataset-metadata.json"
+            print(f'Loading {example_datasets}')
+            return json.loads(open(example_datasets).read())
         try:
             s3_datasets = json.loads(
                 s3_get(bucket=BUCKET, key=DATASET_METADATA_FILENAME)
@@ -41,28 +45,10 @@ class DatasetManager(object):
             print("datasets json successfully loaded from S3")
             return s3_datasets
         except botocore.errorfactory.ClientError as e:
-            print("error caught")
-
-            if e.response["Error"]["Code"] == "NoSuchKey":
-                print(
-                    "No datasets domain metadata file found, requesting generation"
-                    " of a new file. This may take several minutes."
-                )
-                # invoke_lambda should return the output of the lambda's execution
-                # however there are issues with accessing the output object within the
-                # "Payload" returned by the lambda_invocation (see docstring).
-                # Instead the thread is held while the lambda executes and then
-                # loads the metadata from s3.
-                try:
-                    invoke_lambda(
-                        lambda_function_name=DATASET_METADATA_GENERATOR_FUNCTION_NAME
-                    )
-                    return json.loads(
-                        s3_get(bucket=BUCKET, key=DATASET_METADATA_FILENAME)
-                    )
-                except botocore.errorfactory.ClientError as e:
-                    if e.response["Error"]["Code"] in ["ResourceNotFoundException", "NoSuchKey"]:
-                        return json.loads(open("example-dataset-metadata.json").read())
+            if e.response["Error"]["Code"] in ["ResourceNotFoundException", "NoSuchKey"]:
+                return json.loads(open("example-dataset-metadata.json").read())
+            else:
+                raise e
 
 
     def get(self, spotlight_id: str, api_url: str) -> Datasets:
