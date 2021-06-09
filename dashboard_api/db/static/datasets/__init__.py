@@ -113,17 +113,12 @@ class DatasetManager(object):
 
     def _format_urls(self, tiles: List[str], api_url: str, spotlight_id: str = None):
         if spotlight_id:
-            return [
-                tile.replace("{api_url}", api_url).replace(
-                    "{spotlightId}", spotlight_id
-                )
-                for tile in tiles
-            ]
+            [ tile.replace("{spotlightId}", spotlight_id) for tile in tiles ]
         return [
             tile.replace("{api_url}", api_url) and
             tile.replace("{vector_tileserver_url}", VECTOR_TILESERVER_URL)
             for tile in tiles
-            ]
+        ]
 
     def _process(
         self, datasets_domains_metadata: dict, api_url: str, spotlight_id: str = None
