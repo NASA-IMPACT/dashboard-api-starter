@@ -18,17 +18,15 @@ cd dashboard-api-starter
 cp stack/config.yml.example stack/config.yml
 ```
 
-Note, the local `stack/config.yml` file will only be used for running the app locally. Deployment is managed via github actions (See `.github/workflows/deploy.yml`).
+Note, the local `stack/config.yml` file will only be used for running the app locally. Deployment to AWS is managed via CDK and github actions (See `.github/workflows/deploy.yml`).
 
 Datasets for `/v1/datasets` are loaded from a json file stored in S3 unless `ENV=local` is set when running the app. The S3 location for these datasets is defined by the `BUCKET` and `DATASET_METADATA_FILENAME` values in `stack/config.yml`: `s3://{BUCKET}/{DATASET_METADATA_FILENAME}`.
 
 ### Running the app locally
 
-To run the app locally, you can use `ENV=local` when running the app to use the `example-dataset-metadata.json` file as the source for `/v1/datasets`. This is useful for testing new dataset configurations.
+You can use `ENV=local` when running the app locally to use the `example-dataset-metadata.json` file as the source for `/v1/datasets`. This is useful for testing new dataset configurations.
 
-**IMPORTANT:** Create if needed and ensure access to the buckets configured in `stack/config.yml`.
-
-This requires read and write access to the s3 bucket in `stack/config.yml`.
+**NOTE:** Create if needed and ensure access to the bucket configured in `stack/config.yml`.
 
 ```bash
 pyenv install
