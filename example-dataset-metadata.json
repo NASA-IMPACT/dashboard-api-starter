@@ -90,53 +90,33 @@
                 "2020-05-08T00:00:00Z"
             ]
         },
-        "sentinel-s2-l2a": {
-            "id": "sentinel-s2-l2a",
-            "name": "Sentinel 2 L2A",
-            "type": "raster",
-            "time_unit": "day",
+        "ATL08": {
+            "id": "ATL08",
+            "name": "ATL08 ICESat-2",
+            "type": "vector",
             "is_periodic": false,
-            "source": {
-                "type": "raster",
-                "tiles": []
-            },
-            "info": "Sentinel-2a and Sentinel-2b imagery, processed to Level 2A (Surface Reflectance)"
-        },
-        "sentinel-s2-l1c": {
-            "id": "sentinel-s2-l1c",
-            "name": "Sentinel 2 L1C",
-            "type": "raster",
             "time_unit": "day",
-            "is_periodic": false,
             "source": {
-                "type": "raster",
-                "tiles": []
+                "type": "vector",
+                "layer-type": "circle",
+                "source-layer": "atl08",
+                "url": "http://localhost:8080/data/atl08.json",
+                "tiles": [
+                    "http://localhost:8080/data/atl08/{z}/{x}/{y}.pbf"
+                ],
+                "paint": {
+                    "circle-radius": 2,
+                    "circle-opacity": 0.7,
+                    "circle-color": {
+                        "property": "Z",
+                        "stops": [
+                            [0, "#fff"], [1000, "#ffa500"]
+                        ]
+                    },
+                    "circle-stroke-color": "orange"
+                }
             },
-            "info": "Sentinel-2a and Sentinel-2b imagery, processed to Level 1C (Top-Of-Atmosphere Geometrically Corrected)"
-        },
-        "sentinel-s2-l2a-cogs": {
-            "id": "sentinel-s2-l2a-cogs",
-            "name": "Sentinel 2 L2A COGs",
-            "type": "raster",
-            "time_unit": "day",
-            "is_periodic": false,
-            "source": {
-                "type": "raster",
-                "tiles": ["https://api.cogeo.xyz/mosaicjson/anonymous.aimee_sentinel-l2a-cogs-example4/tiles/{z}/{x}/{y}@1x?"]
-            },
-            "info": "Sentinel-2a and Sentinel-2b imagery, processed to Level 2A (Surface Reflectance) and converted to Cloud-Optimized GeoTIFFs"
-        },
-        "landsat-8-l1-c1": {
-            "id": "landsat-8-l1-c1",
-            "name": "Landsat-8 L1 Collection-1",
-            "type": "raster",
-            "time_unit": "day",
-            "is_periodic": false,
-            "source": {
-                "type": "raster",
-                "tiles": []
-            },
-            "info": "Landat-8 L1 Collection-1 imagery radiometrically calibrated and orthorectified using gound points and Digital Elevation Model (DEM) data to correct relief displacement."
+            "info": "ATL08 data"
         }
     },
     "global": {
@@ -230,53 +210,33 @@
                 "2020-05-08T00:00:00Z"
             ]
         },
-        "sentinel-s2-l2a": {
-            "id": "sentinel-s2-l2a",
-            "name": "Sentinel 2 L2A",
-            "type": "raster",
-            "time_unit": "day",
+        "ATL08": {
+            "id": "ATL08",
+            "name": "ATL08 ICESat-2",
+            "type": "vector",
             "is_periodic": false,
-            "source": {
-                "type": "raster",
-                "tiles": []
-            },
-            "info": "Sentinel-2a and Sentinel-2b imagery, processed to Level 2A (Surface Reflectance)"
-        },
-        "sentinel-s2-l1c": {
-            "id": "sentinel-s2-l1c",
-            "name": "Sentinel 2 L1C",
-            "type": "raster",
             "time_unit": "day",
-            "is_periodic": false,
             "source": {
-                "type": "raster",
-                "tiles": []
+                "type": "vector",
+                "layer-type": "circle",
+                "source-layer": "atl08",
+                "url": "http://localhost:8080/data/atl08.json",
+                "tiles": [
+                    "http://localhost:8080/data/atl08/{z}/{x}/{y}.pbf"
+                ],
+                "paint": {
+                    "circle-radius": 2,
+                    "circle-opacity": 0.7,
+                    "circle-color": {
+                        "property": "Z",
+                        "stops": [
+                            [0, "#fff"], [1000, "#ffa500"]
+                        ]
+                    },
+                    "circle-stroke-color": "orange"
+                }
             },
-            "info": "Sentinel-2a and Sentinel-2b imagery, processed to Level 1C (Top-Of-Atmosphere Geometrically Corrected)"
-        },
-        "sentinel-s2-l2a-cogs": {
-            "id": "sentinel-s2-l2a-cogs",
-            "name": "Sentinel 2 L2A COGs",
-            "type": "raster",
-            "time_unit": "day",
-            "is_periodic": false,
-            "source": {
-                "type": "raster",
-                "tiles": []
-            },
-            "info": "Sentinel-2a and Sentinel-2b imagery, processed to Level 2A (Surface Reflectance) and converted to Cloud-Optimized GeoTIFFs"
-        },
-        "landsat-8-l1-c1": {
-            "id": "landsat-8-l1-c1",
-            "name": "Landsat-8 L1 Collection-1",
-            "type": "raster",
-            "time_unit": "day",
-            "is_periodic": false,
-            "source": {
-                "type": "raster",
-                "tiles": []
-            },
-            "info": "Landat-8 L1 Collection-1 imagery radiometrically calibrated and orthorectified using gound points and Digital Elevation Model (DEM) data to correct relief displacement."
+            "info": "ATL08 data"
         }
     }
 }

@@ -32,11 +32,15 @@ class DatasetManager(object):
         }
 
     def _load_metadata_from_file(self):
+        return json.loads(open("example-dataset-metadata.json").read())
         try:
-            return json.loads(
+            s3_datasets = json.loads(
                 s3_get(bucket=BUCKET, key=DATASET_METADATA_FILENAME)
             )
+            print("datasets json successfully loaded from S3")
+            return s3_datasets
         except botocore.errorfactory.ClientError as e:
+            print("error caught")
 
             if e.response["Error"]["Code"] == "NoSuchKey":
                 print(
@@ -58,6 +62,7 @@ class DatasetManager(object):
                 except botocore.errorfactory.ClientError as e:
                     if e.response["Error"]["Code"] in ["ResourceNotFoundException", "NoSuchKey"]:
                         return json.loads(open("example-dataset-metadata.json").read())
+
 
     def get(self, spotlight_id: str, api_url: str) -> Datasets:
         """
