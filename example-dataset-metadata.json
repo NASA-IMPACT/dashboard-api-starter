@@ -98,25 +98,25 @@
             "time_unit": "day",
             "source": {
                 "type": "vector",
-                "layer-type": "circle",
-                "source-layer": "atl08",
-                "url": "http://localhost:8080/data/atl08.json",
+                "layer_type": "circle",
+                "source_layer": "atl08",
+                "source_url": "http://localhost:8080/data/atl08.json",
                 "tiles": [
                     "http://localhost:8080/data/atl08/{z}/{x}/{y}.pbf"
-                ],
-                "paint": {
-                    "circle-radius": 2,
-                    "circle-opacity": 0.7,
-                    "circle-color": {
-                        "property": "Z",
-                        "stops": [
-                            [0, "#fff"], [1000, "#ffa500"]
-                        ]
-                    },
-                    "circle-stroke-color": "orange"
-                }
+                ]
             },
-            "info": "ATL08 data"
+            "info": "ATL08 data",
+            "paint": {
+                "circle-radius": 2,
+                "circle-opacity": 0.7,
+                "circle-color": {
+                    "property": "Z",
+                    "stops": [
+                        [0, "#fff"], [1000, "#ffa500"]
+                    ]
+                },
+                "circle-stroke-color": "orange"
+            }
         }
     },
     "global": {
@@ -218,25 +218,25 @@
             "time_unit": "day",
             "source": {
                 "type": "vector",
-                "layer-type": "circle",
-                "source-layer": "atl08",
-                "url": "http://localhost:8080/data/atl08.json",
+                "layer_type": "circle",
+                "source_layer": "atl08",
+                "source_url": "http://localhost:8080/data/atl08.json",
                 "tiles": [
                     "http://localhost:8080/data/atl08/{z}/{x}/{y}.pbf"
-                ],
-                "paint": {
-                    "circle-radius": 2,
-                    "circle-opacity": 0.7,
-                    "circle-color": {
-                        "property": "Z",
-                        "stops": [
-                            [0, "#fff"], [1000, "#ffa500"]
-                        ]
-                    },
-                    "circle-stroke-color": "orange"
-                }
+                ]
             },
-            "info": "ATL08 data"
+            "info": "ATL08 data",
+            "paint": {
+                "circle_radius": 2,
+                "circle_opacity": 0.7,
+                "circle_color": {
+                    "property": "Z",
+                    "stops": [
+                        [0, "#fff"], [1000, "#ffa500"]
+                    ]
+                },
+                "circle_stroke_color": "orange"
+            }
         }
     }
 }
