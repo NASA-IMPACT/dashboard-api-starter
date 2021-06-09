@@ -184,6 +184,10 @@ class DatasetManager(object):
             dataset.source.tiles = self._format_urls(
                 tiles=dataset.source.tiles, **format_url_params
             )
+
+            if dataset.source.source_url:
+                dataset.source.source_url = dataset.source.source_url.replace("{vector_tileserver_url}", VECTOR_TILESERVER_URL)
+
             if dataset.background_source:
                 dataset.background_source.tiles = self._format_urls(
                     tiles=dataset.background_source.tiles, **format_url_params
