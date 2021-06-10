@@ -8,7 +8,8 @@ import botocore
 from dashboard_api.core.config import (DATASET_METADATA_FILENAME,
                                    DATASET_METADATA_GENERATOR_FUNCTION_NAME,
                                    BUCKET,
-                                   VECTOR_TILESERVER_URL)
+                                   VECTOR_TILESERVER_URL,
+                                   TITILER_SERVER_URL)
 from dashboard_api.db.static.errors import InvalidIdentifier
 from dashboard_api.db.static.sites import sites
 from dashboard_api.db.utils import invoke_lambda, s3_get
@@ -116,7 +117,8 @@ class DatasetManager(object):
             [ tile.replace("{spotlightId}", spotlight_id) for tile in tiles ]
         return [
             tile.replace("{api_url}", api_url) and
-            tile.replace("{vector_tileserver_url}", VECTOR_TILESERVER_URL)
+            tile.replace("{vector_tileserver_url}", VECTOR_TILESERVER_URL) and
+            tile.replace("{titiler_server_url}", TITILER_SERVER_URL)
             for tile in tiles
         ]
 
@@ -168,6 +170,7 @@ class DatasetManager(object):
 
             if dataset.source.source_url:
                 dataset.source.source_url = dataset.source.source_url.replace("{vector_tileserver_url}", VECTOR_TILESERVER_URL)
+                dataset.source.source_url = dataset.source.source_url.replace("{titiler_server_url}", TITILER_SERVER_URL)
 
             if dataset.background_source:
                 dataset.background_source.tiles = self._format_urls(
