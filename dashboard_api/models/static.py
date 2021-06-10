@@ -26,6 +26,9 @@ class NonGeoJsonSource(Source):
     """Source Model for all non-geojson data types"""
 
     tiles: List[str]
+    source_layer: Optional[str]
+    layer_type: Optional[str]
+    source_url: Optional[str]
 
 
 class GeoJsonSource(Source):
@@ -75,8 +78,11 @@ def snake_case_to_kebab_case(s):
 
 class Paint(BaseModel):
     """Paint Model."""
-
-    raster_opacity: float
+    # raster_opacity: Optional[float] = None
+    circle_radius: Optional[float]
+    circle_opacity: Optional[float]
+    circle_color: Optional[dict]
+    circle_stroke_color: Optional[str]
 
     class Config:
         """Paint Model Config"""

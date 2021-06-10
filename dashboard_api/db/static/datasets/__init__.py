@@ -7,7 +7,8 @@ import botocore
 
 from dashboard_api.core.config import (DATASET_METADATA_FILENAME,
                                    DATASET_METADATA_GENERATOR_FUNCTION_NAME,
-                                   BUCKET)
+                                   BUCKET,
+                                   VECTOR_TILESERVER_URL)
 from dashboard_api.db.static.errors import InvalidIdentifier
 from dashboard_api.db.static.sites import sites
 from dashboard_api.db.utils import invoke_lambda, s3_get
@@ -32,32 +33,23 @@ class DatasetManager(object):
         }
 
     def _load_metadata_from_file(self):
+        if os.environ.get('ENV') == 'local':
+            # Useful for local testing
+            example_datasets = "example-dataset-metadata.json"
+            print(f'Loading {example_datasets}')
+            return json.loads(open(example_datasets).read())
         try:
-            return json.loads(
+            s3_datasets = json.loads(
                 s3_get(bucket=BUCKET, key=DATASET_METADATA_FILENAME)
             )
+            print("datasets json successfully loaded from S3")
+            return s3_datasets
         except botocore.errorfactory.ClientError as e:
+            if e.response["Error"]["Code"] in ["ResourceNotFoundException", "NoSuchKey"]:
+                return json.loads(open("example-dataset-metadata.json").read())
+            else:
+                raise e
 
-            if e.response["Error"]["Code"] == "NoSuchKey":
-                print(
-                    "No datasets domain metadata file found, requesting generation"
-                    " of a new file. This may take several minutes."
-                )
-                # invoke_lambda should return the output of the lambda's execution
-                # however there are issues with accessing the output object within the
-                # "Payload" returned by the lambda_invocation (see docstring).
-                # Instead the thread is held while the lambda executes and then
-                # loads the metadata from s3.
-                try:
-                    invoke_lambda(
-                        lambda_function_name=DATASET_METADATA_GENERATOR_FUNCTION_NAME
-                    )
-                    return json.loads(
-                        s3_get(bucket=BUCKET, key=DATASET_METADATA_FILENAME)
-                    )
-                except botocore.errorfactory.ClientError as e:
-                    if e.response["Error"]["Code"] in ["ResourceNotFoundException", "NoSuchKey"]:
-                        return json.loads(open("example-dataset-metadata.json").read())
 
     def get(self, spotlight_id: str, api_url: str) -> Datasets:
         """
@@ -121,13 +113,12 @@ class DatasetManager(object):
 
     def _format_urls(self, tiles: List[str], api_url: str, spotlight_id: str = None):
         if spotlight_id:
-            return [
-                tile.replace("{api_url}", api_url).replace(
-                    "{spotlightId}", spotlight_id
-                )
-                for tile in tiles
-            ]
-        return [tile.replace("{api_url}", api_url) for tile in tiles]
+            [ tile.replace("{spotlightId}", spotlight_id) for tile in tiles ]
+        return [
+            tile.replace("{api_url}", api_url) and
+            tile.replace("{vector_tileserver_url}", VECTOR_TILESERVER_URL)
+            for tile in tiles
+        ]
 
     def _process(
         self, datasets_domains_metadata: dict, api_url: str, spotlight_id: str = None
@@ -174,6 +165,10 @@ class DatasetManager(object):
             dataset.source.tiles = self._format_urls(
                 tiles=dataset.source.tiles, **format_url_params
             )
+
+            if dataset.source.source_url:
+                dataset.source.source_url = dataset.source.source_url.replace("{vector_tileserver_url}", VECTOR_TILESERVER_URL)
+
             if dataset.background_source:
                 dataset.background_source.tiles = self._format_urls(
                     tiles=dataset.background_source.tiles, **format_url_params
