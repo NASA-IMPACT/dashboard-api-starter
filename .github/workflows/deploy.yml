@@ -3,7 +3,11 @@ on:
   push:
     branches:
       - main
+<<<<<<< HEAD
       - aimee-deploy
+=======
+      - abarciauskas-bgse_add-atl08
+>>>>>>> main
 
 env:
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
