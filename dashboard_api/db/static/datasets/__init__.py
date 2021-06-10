@@ -6,7 +6,6 @@ from typing import List
 import botocore
 
 from dashboard_api.core.config import (DATASET_METADATA_FILENAME,
-                                   DATASET_METADATA_GENERATOR_FUNCTION_NAME,
                                    BUCKET,
                                    VECTOR_TILESERVER_URL,
                                    TITILER_SERVER_URL)

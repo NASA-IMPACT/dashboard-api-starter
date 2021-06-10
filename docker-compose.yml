@@ -25,7 +25,6 @@ services:
       - MEMCACHE_USERNAME=myuser
       - MEMCACHE_PASSWORD=mypassword
       - DATASET_METADATA_FILENAME=${STAGE}-dataset-metadata.json
-      - DATASET_METADATA_GENERATOR_FUNCTION_NAME=${STAGE}-dataset-metadata-generator
       - PORT=8000
       - PYTHONWARNINGS=ignore
       - VARIABLE_NAME=app
