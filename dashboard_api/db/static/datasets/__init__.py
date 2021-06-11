@@ -192,7 +192,7 @@ class DatasetManager(object):
                     tile.replace("&rescale=-100%2C100", "")
                     for tile in dataset.source.tiles
                 ]
-        output_datasets = sorted(output_datasets.values(), key=lambda x: x.order, reverse=True)
+        output_datasets = sorted(output_datasets.values(), key=lambda x: x.order)
         return output_datasets
 
 
