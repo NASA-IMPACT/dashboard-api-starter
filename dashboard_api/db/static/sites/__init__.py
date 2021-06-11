@@ -18,6 +18,7 @@ class SiteManager(object):
         site_ids = [
             os.path.splitext(f)[0] for f in os.listdir(data_dir) if f.endswith(".json")
         ]
+        print(data_dir)
 
         self._data = {
             site: Site.parse_file(os.path.join(data_dir, f"{site}.json"))
