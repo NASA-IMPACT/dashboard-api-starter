@@ -110,6 +110,7 @@ class Dataset(BaseModel):
     info: Optional[str] = ""
     order: Optional[int] = 10000
 
+
 class DatasetExternal(Dataset):
     """ Public facing dataset model (uses camelCase fieldnames) """
 
