@@ -115,9 +115,9 @@ class DatasetManager(object):
         if spotlight_id:
             [ tile.replace("{spotlightId}", spotlight_id) for tile in tiles ]
         return [
-            tile.replace("{api_url}", api_url) and
-            tile.replace("{vector_tileserver_url}", VECTOR_TILESERVER_URL) and
-            tile.replace("{titiler_server_url}", TITILER_SERVER_URL)
+            tile.replace("{api_url}", api_url)
+            .replace("{vector_tileserver_url}", VECTOR_TILESERVER_URL)
+            .replace("{titiler_server_url}", TITILER_SERVER_URL)
             for tile in tiles
         ]
 
