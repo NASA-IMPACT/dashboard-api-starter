@@ -3,11 +3,7 @@ on:
   push:
     branches:
       - main
-<<<<<<< HEAD
       - aimee-deploy
-=======
-      - add-landsat8_covariates
->>>>>>> origin/add-landsat8_covariates
 
 env:
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
