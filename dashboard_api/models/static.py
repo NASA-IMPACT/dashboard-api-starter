@@ -108,7 +108,7 @@ class Dataset(BaseModel):
     legend: Optional[Legend]
     paint: Optional[Paint]
     info: Optional[str] = ""
-
+    order: Optional[int] = 10000
 
 class DatasetExternal(Dataset):
     """ Public facing dataset model (uses camelCase fieldnames) """
