@@ -30,7 +30,7 @@ jobs:
 
       - uses: franzbischoff/replace_envs@v1
         env:
-          PROJECT_NAME: 'eo-lab-project'
+          PROJECT_NAME: 'maap'
           DATA_BUCKET: 'earthdata-dashboard'
           STAGE: ${{ steps.extract_branch.outputs.branch }}
           STAC_API_URL: ''
