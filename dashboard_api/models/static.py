@@ -75,21 +75,23 @@ def snake_case_to_kebab_case(s):
     """Util method to convert kebab-case fieldnames to snake_case."""
     return s.replace("_", "-")
 
-
 class Paint(BaseModel):
-    """Paint Model."""
-    # raster_opacity: Optional[float] = None
-    circle_radius: Optional[float]
-    circle_opacity: Optional[float]
-    circle_color: Optional[dict]
-    circle_stroke_color: Optional[str]
-
     class Config:
         """Paint Model Config"""
-
         alias_generator = snake_case_to_kebab_case
         allow_population_by_field_name = True
 
+class RasterPaint(Paint):
+    """Raster Paint Model."""
+    raster_opacity: Optional[float] = None
+
+class CirclePaint(Paint):
+    """Circle Paint Model."""
+    # To use the Union we must make at least one attribute non-optional in order to bypass this option in favor of RasterPaint, for example.
+    circle_radius: float
+    circle_opacity: Optional[float]
+    circle_color: Optional[dict]
+    circle_stroke_color: Optional[str]
 
 class Dataset(BaseModel):
     """Dataset Model."""
@@ -106,7 +108,7 @@ class Dataset(BaseModel):
     swatch: Optional[Swatch]
     compare: Optional[DatasetComparison]
     legend: Optional[Legend]
-    paint: Optional[Paint]
+    paint: Optional[Union[CirclePaint, RasterPaint]]
     info: Optional[str] = ""
     order: Optional[int] = 10000
 
