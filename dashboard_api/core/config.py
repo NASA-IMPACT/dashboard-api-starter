@@ -10,6 +10,7 @@ config_object = yaml.load(
 
 STAGE = os.environ.get("STAGE", config_object["STAGE"])
 VECTOR_TILESERVER_URL = os.environ.get("VECTOR_TILESERVER_URL", config_object["VECTOR_TILESERVER_URL"])
+TITILER_SERVER_URL = os.environ.get("TITILER_SERVER_URL", config_object["TITILER_SERVER_URL"])
 API_VERSION_STR = "/v1"
 
 PROJECT_NAME = config_object["PROJECT_NAME"]
@@ -30,10 +31,6 @@ BUCKET = os.environ.get("BUCKET", config_object["BUCKET"])
 
 DATASET_METADATA_FILENAME = os.environ.get(
     "DATASET_METADATA_FILENAME", config_object["DATASET_METADATA_FILENAME"]
-)
-
-DATASET_METADATA_GENERATOR_FUNCTION_NAME = os.environ.get(
-    "DATASET_METADATA_GENERATOR_FUNCTION_NAME", "dev-dataset-metadata-generator"
 )
 
 DT_FORMAT = "%Y-%m-%d"
