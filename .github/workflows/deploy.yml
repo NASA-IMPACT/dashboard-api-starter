@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - main
-      - abarciauskas-bgse_add-atl08
+      - aimee-deploy
 
 env:
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
@@ -13,6 +13,11 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+
       - name: Configure AWS credentials from MAAP AWS Account
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -27,9 +32,10 @@ jobs:
         env:
           PROJECT_NAME: 'maap'
           DATA_BUCKET: 'earthdata-dashboard'
-          STAGE: 'dit'
+          STAGE: ${{ steps.extract_branch.outputs.branch }}
           STAC_API_URL: ''
           VECTOR_TILESERVER_URL: 'http://ec2-3-89-226-195.compute-1.amazonaws.com:8080'
+          TITILER_SERVER_URL: 'https://baxpil3vd6.execute-api.us-east-1.amazonaws.com'
         with:
           from_file: 'stack/config.yml.example'
           to_file: 'stack/config.yml'

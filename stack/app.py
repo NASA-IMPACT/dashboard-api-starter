@@ -48,7 +48,6 @@ class dashboardApiLambdaStack(core.Stack):
         scope: core.Construct,
         id: str,
         dataset_metadata_filename: str,
-        dataset_metadata_generator_function_name: str,
         memory: int = 1024,
         timeout: int = 30,
         concurrent: int = 100,
@@ -125,7 +124,6 @@ class dashboardApiLambdaStack(core.Stack):
                 MEMCACHE_HOST=cache.attr_configuration_endpoint_address,
                 MEMCACHE_PORT=cache.attr_configuration_endpoint_port,
                 DATASET_METADATA_FILENAME=dataset_metadata_filename,
-                DATASET_METADATA_GENERATOR_FUNCTION_NAME=dataset_metadata_generator_function_name
             )
         )
 
@@ -175,94 +173,6 @@ class dashboardApiLambdaStack(core.Stack):
             ),
         )
 
-
-class dashboardApiDatasetMetadataGeneratorStack(core.Stack):
-    """Dataset metadata generator stack - comprises a lambda and a Cloudwatch
-    event that triggers a new lambda execution every 24hrs"""
-
-    def __init__(
-        self,
-        scope: core.Construct,
-        id: str,
-        dataset_metadata_filename: str,
-        dataset_metadata_generator_function_name: str,
-        code_dir: str = "./",
-        **kwargs: Any,
-    ) -> None:
-        """Define stack."""
-        super().__init__(scope, id, *kwargs)
-
-        base = os.path.abspath(os.path.join("dashboard_api", "db", "static"))
-        lambda_deployment_package_location = os.path.abspath(
-            os.path.join(code_dir, "lambda", "dataset_metadata_generator")
-        )
-        for e in ["datasets", "sites"]:
-            self.copy_metadata_files_to_lambda_deployment_package(
-                from_dir=os.path.join(base, e),
-                to_dir=os.path.join(lambda_deployment_package_location, "src", e),
-            )
-
-        data_bucket = aws_s3.Bucket.from_bucket_name(
-            self, id=f"{id}-data-bucket", bucket_name=config.BUCKET
-        )
-
-        dataset_metadata_updater_function = aws_lambda.Function(
-            self,
-            f"{id}-metadata-updater-lambda",
-            runtime=aws_lambda.Runtime.PYTHON_3_8,
-            code=aws_lambda.Code.from_asset(lambda_deployment_package_location),
-            handler="src.main.handler",
-            environment={
-                "DATASET_METADATA_FILENAME": dataset_metadata_filename,
-                "DATA_BUCKET_NAME": data_bucket.bucket_name,
-            },
-            function_name=dataset_metadata_generator_function_name,
-            timeout=core.Duration.minutes(5),
-        )
-
-        for e in ["datasets", "sites"]:
-            shutil.rmtree(os.path.join(lambda_deployment_package_location, "src", e))
-
-        data_bucket.grant_read_write(dataset_metadata_updater_function)
-
-        aws_events.Rule(
-            self,
-            f"{id}-metadata-update-daily-trigger",
-            # triggers everyday
-            schedule=aws_events.Schedule.rate(duration=core.Duration.days(1)),
-            targets=[
-                aws_events_targets.LambdaFunction(dataset_metadata_updater_function)
-            ],
-        )
-
-    def copy_metadata_files_to_lambda_deployment_package(self, from_dir, to_dir):
-        """Copies dataset metadata files to the lambda deployment package
-        so that the dataset domain extractor lambda has access to the necessary
-        metadata items at runtime
-        Params:
-        -------
-        from_dir (str): relative filepath from which to copy all `.json` files
-        to_dir (str): relative filepath to copy `.json` files to
-        Return:
-        -------
-        None
-        """
-        files = [
-            os.path.abspath(os.path.join(d, f))
-            for d, _, fnames in os.walk(from_dir)
-            for f in fnames
-            if f.endswith(".json")
-        ]
-
-        try:
-            os.mkdir(to_dir)
-        except FileExistsError:
-            pass
-
-        for f in files:
-            shutil.copy(f, to_dir)
-
-
 app = core.App()
 
 
@@ -284,21 +194,10 @@ dashboardApiLambdaStack(
     timeout=config.TIMEOUT,
     concurrent=config.MAX_CONCURRENT,
     dataset_metadata_filename=f"{config.STAGE}-dataset-metadata.json",
-    dataset_metadata_generator_function_name=f"{config.STAGE}-dataset-metadata-generator",
     env=dict(
         account=os.environ["CDK_DEFAULT_ACCOUNT"],
         region=os.environ["CDK_DEFAULT_REGION"],
     ),
-)
-
-dataset_metadata_generator_stackname = (
-    f"{config.PROJECT_NAME}-dataset-metadata-generator-{config.STAGE}"
-)
-dashboardApiDatasetMetadataGeneratorStack(
-    app,
-    dataset_metadata_generator_stackname,
-    dataset_metadata_filename=f"{config.STAGE}-dataset-metadata.json",
-    dataset_metadata_generator_function_name=f"{config.STAGE}-dataset-metadata-generator",
 )
 
 app.synth()
