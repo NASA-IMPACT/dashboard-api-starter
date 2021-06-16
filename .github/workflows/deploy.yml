@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - main
-      - aimee-deploy
+      - staging
 
 env:
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
@@ -34,7 +34,7 @@ jobs:
           DATA_BUCKET: 'earthdata-dashboard'
           STAGE: ${{ steps.extract_branch.outputs.branch }}
           STAC_API_URL: ''
-          VECTOR_TILESERVER_URL: 'http://ec2-3-89-226-195.compute-1.amazonaws.com:8080'
+          VECTOR_TILESERVER_URL: 'http://mbtil-mbtil-83r5gx9bxbbp-1274650133.us-east-1.elb.amazonaws.com/services'
           TITILER_SERVER_URL: 'https://baxpil3vd6.execute-api.us-east-1.amazonaws.com'
         with:
           from_file: 'stack/config.yml.example'
