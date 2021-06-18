@@ -1,6 +1,6 @@
 {
-  "id": "boreal-fc",
-  "label": "Boreal - Forest Classification",
+  "id": "taiga",
+  "label": "Taiga Ecotone",
   "center": [ -147.5000459,  67.5003088 ],
   "polygon":  {
     "type": "Polygon",
