@@ -26,7 +26,7 @@ Datasets for `/v1/datasets` are loaded from a json file stored in S3 unless `ENV
 
 You can use `ENV=local` when running the app locally to use the `example-dataset-metadata.json` file as the source for `/v1/datasets`. This is useful for testing new dataset configurations.
 
-**NOTE:** Create if needed and ensure access to the bucket configured in `stack/config.yml`.
+**NOTE:** Create if needed and ensure access to the bucket configured in `stack/config.yml`. When using github actions to deploy the API this config file is generated from `stack/config.yml.example` using the variables (including a bucket) defined there.
 
 ```bash
 pyenv install
@@ -53,23 +53,9 @@ Test the api `open http://localhost:8000/v1/datasets`
 
 Issues and pull requests are more than welcome.
 
-### If developing on the appplication, use pre-commit
+## Metadata Generation
 
-This repo is set to use `pre-commit` to run *my-py*, *flake8*, *pydocstring* and *black* ("uncompromising Python code formatter") when commiting new code.
-
-```bash
-$ pre-commit install
-$ git add .
-$ git commit -m'fix a really important thing'
-black....................................................................Passed
-Flake8...................................................................Passed
-Verifying PEP257 Compliance..............................................Passed
-mypy.....................................................................Passed
-[precommit cc12c5a] fix a really important thing
- ```
-
-
-Metadata is used to list serve data via `/datasets`, `/tiles`, and `/timelapse`. Datasets are fetched from the bucket configured in `config.yml`.
+Metadata is used to list serve data via `/datasets`, `/tiles`, and `/timelapse`. Datasets are fetched from the bucket configured in `config.yml`. When using github actions to deploy the API this config file is generated from `stack/config.yml.example` using the variables (including a bucket) defined there. Assuming you are using the API with a repo based off of https://github.com/NASA-IMPACT/dashboard-datasets-starter/, you will want to configure `DATA_BUCKET` in deploy.yml to match what is deployed as a part of your datasets.repo.
 
 ## Cloud Deployment
 
