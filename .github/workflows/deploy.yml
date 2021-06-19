@@ -18,7 +18,7 @@ jobs:
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branch
 
-      - name: Configure AWS credentials from MAAP AWS Account
+      - name: Configure AWS credentials from AWS Account
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -30,8 +30,8 @@ jobs:
 
       - uses: franzbischoff/replace_envs@v1
         env:
-          PROJECT_NAME: 'maap'
-          DATA_BUCKET: 'earthdata-dashboard'
+          PROJECT_NAME: 'template-project'
+          DATA_BUCKET: 'bucket-does-not-exist'
           STAGE: ${{ steps.extract_branch.outputs.branch }}
           VECTOR_TILESERVER_URL: ''
           TITILER_SERVER_URL: ''

@@ -26,7 +26,7 @@ Datasets for `/v1/datasets` are loaded from a json file stored in S3 unless `ENV
 
 You can use `ENV=local` when running the app locally to use the `example-dataset-metadata.json` file as the source for `/v1/datasets`. This is useful for testing new dataset configurations.
 
-**NOTE:** Create if needed and ensure access to the bucket configured in `stack/config.yml`.
+**NOTE:** Create if needed and ensure access to the bucket configured in `stack/config.yml`. When using github actions to deploy the API this config file is generated from `stack/config.yml.example` using the variables (including a bucket) defined there.
 
 ```bash
 pyenv install
@@ -53,34 +53,9 @@ Test the api `open http://localhost:8000/v1/datasets`
 
 Issues and pull requests are more than welcome.
 
-### If developing on the appplication, use pre-commit
+## Metadata Generation
 
-This repo is set to use `pre-commit` to run *my-py*, *flake8*, *pydocstring* and *black* ("uncompromising Python code formatter") when commiting new code.
-
-```bash
-$ pre-commit install
-$ git add .
-$ git commit -m'fix a really important thing'
-black....................................................................Passed
-Flake8...................................................................Passed
-Verifying PEP257 Compliance..............................................Passed
-mypy.....................................................................Passed
-[precommit cc12c5a] fix a really important thing
- ```
-
-in `stack/config.yml` and / or listing datasets from an external `STAC_API_URL`.
-
-Metadata is used to list serve data via `/datasets`, `/tiles`, and `/timelapse` There are 2 possible sources of metadata for serving these resources.
-
-1. Static JSON files, stored in `dashboard_api/db/static/datasets/`
-2. STAC API, defined in `stack/config.yml`
-
-In `lambda/dataset_metadata_generator` is code for a lambda to asynchronously generate metadata json files.
-
-This lambda generates metadata in 2 ways:
-
-1. Reads through the s3 bucket to generate a file that contains the datasets for each given spotlight option (_all, global, tk, ny, sf, la, be, du, gh) and their respective domain for each spotlight.
-2. If `STAC_API_URL` is configured in `stack/config.yml`, fetches collections from a STAC catalogue and generates a metadata object for each collection.
+Metadata is used to list serve data via `/datasets`, `/tiles`, and `/timelapse`. Datasets are fetched from the bucket configured in `config.yml`. When using github actions to deploy the API this config file is generated from `stack/config.yml.example` using the variables (including a bucket) defined there. Assuming you are using the API with a repo based off of https://github.com/NASA-IMPACT/dashboard-datasets-starter/, you will want to configure `DATA_BUCKET` in deploy.yml to match what is deployed as a part of your datasets.repo.
 
 ## Cloud Deployment
 
