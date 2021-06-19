@@ -1,6 +1,6 @@
 # dashboard-api-starter
 
-A lightweight tile server for COVID data, based on [titiler](https://github.com/developmentseed/titiler).
+A lightweight API for Earthdata.
 
 ## Contributing data
 More information for data contributors like expected input format and delivery mechanisms, can be found in the [data guidelines](guidelines/README.md).
@@ -14,29 +14,29 @@ First, add your AWS credentials to a new file called `.env`. You can see an exam
 ```bash
 git clone https://github.com/NASA-IMPACT/dashboard-api-starter.git
 cd dashboard-api-starter
-
-# Add your AWS credentials to a new file called `.env`. You can see an example of this file at `.env.example`.
-cp .env.example .env
 # Copy and configure the app
 cp stack/config.yml.example stack/config.yml
 ```
 
-**IMPORTANT:** Create if needed and ensure access to the buckets configured in `stack/config.yml`.
+Note, the local `stack/config.yml` file will only be used for running the app locally. Deployment to AWS is managed via CDK and github actions (See `.github/workflows/deploy.yml`).
+
+Datasets for `/v1/datasets` are loaded from a json file stored in S3 unless `ENV=local` is set when running the app. The S3 location for these datasets is defined by the `BUCKET` and `DATASET_METADATA_FILENAME` values in `stack/config.yml`: `s3://{BUCKET}/{DATASET_METADATA_FILENAME}`.
 
 ### Running the app locally
 
-To run the app locally, generate a config file and generate the static dataset json files.
+You can use `ENV=local` when running the app locally to use the `example-dataset-metadata.json` file as the source for `/v1/datasets`. This is useful for testing new dataset configurations.
 
-NOTE: This requires read and write access to the s3 bucket in `stack/config.yml`.
+**NOTE:** Create if needed and ensure access to the bucket configured in `stack/config.yml`.
 
 ```bash
 pyenv install
 pip install -e .
 # Create or add buckets for your data files
 export AWS_PROFILE=CHANGEME
-python -m lambda.dataset_metadata_generator.src.main
-# Run the app
+# Run the app with dataset metadata stored on S3
 uvicorn dashboard_api.main:app --reload
+# Run the app with example-dataset-metadata.json - useful for testing
+ENV=local uvicorn dashboard_api.main:app --reload
 ```
 
 Test the api `open http://localhost:8000/v1/datasets`
@@ -67,15 +67,6 @@ Verifying PEP257 Compliance..............................................Passed
 mypy.....................................................................Passed
 [precommit cc12c5a] fix a really important thing
  ```
-
-### Modifying datasets
-
-To modify the existing datasets, one can configure datasets to be listed by revising the list under
-
-```yaml
-DATASETS:
-  STATIC:
-```
 
 in `stack/config.yml` and / or listing datasets from an external `STAC_API_URL`.
 
