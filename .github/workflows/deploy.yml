@@ -33,9 +33,8 @@ jobs:
           PROJECT_NAME: 'maap'
           DATA_BUCKET: 'earthdata-dashboard'
           STAGE: ${{ steps.extract_branch.outputs.branch }}
-          STAC_API_URL: ''
-          VECTOR_TILESERVER_URL: 'http://mbtil-mbtil-83r5gx9bxbbp-1274650133.us-east-1.elb.amazonaws.com/services'
-          TITILER_SERVER_URL: 'https://h9su0upami.execute-api.us-east-1.amazonaws.com'
+          VECTOR_TILESERVER_URL: ''
+          TITILER_SERVER_URL: ''
         with:
           from_file: 'stack/config.yml.example'
           to_file: 'stack/config.yml'
