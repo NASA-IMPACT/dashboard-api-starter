@@ -1,6 +1,6 @@
 # dashboard-api-starter
 
-A lightweight tile server for MAAP data, based on [titiler](https://github.com/developmentseed/titiler).
+A lightweight API for Earthdata.
 
 ## Contributing data
 More information for data contributors like expected input format and delivery mechanisms, can be found in the [data guidelines](guidelines/README.md).
@@ -12,7 +12,7 @@ First, add your AWS credentials to a new file called `.env`. You can see an exam
 ### Clone and configure
 
 ```bash
-git clone https://github.com/MAAP-Project/dashboard-api-starter.git
+git clone https://github.com/NASA-IMPACT/dashboard-api-starter.git
 cd dashboard-api-starter
 # Copy and configure the app
 cp stack/config.yml.example stack/config.yml
@@ -116,7 +116,7 @@ Deploy the dashboard!
 ```bash
 # Suggest changing your parent directory for distinct repository organization
 cd ..
-git clone git@github.com:MAAP-Project/earthdata-dashboard-starter.git
+git clone git@github.com:NASA-IMPACT/earthdata-dashboard-starter.git
 cd earthdata-dashboard-starter
 nvm install
 # configure the API_URL to be the same (you might need to add `v1/` at the end) as returned from `./deploy.sh`
