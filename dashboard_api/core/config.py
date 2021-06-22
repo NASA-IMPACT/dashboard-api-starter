@@ -10,7 +10,11 @@ config_object = yaml.load(
 
 STAGE = os.environ.get("STAGE", config_object["STAGE"])
 VECTOR_TILESERVER_URL = os.environ.get("VECTOR_TILESERVER_URL", config_object["VECTOR_TILESERVER_URL"])
+if VECTOR_TILESERVER_URL is None:
+    VECTOR_TILESERVER_URL = ""
 TITILER_SERVER_URL = os.environ.get("TITILER_SERVER_URL", config_object["TITILER_SERVER_URL"])
+if TITILER_SERVER_URL is None:
+    TITILER_SERVER_URL = ""
 API_VERSION_STR = "/v1"
 
 PROJECT_NAME = config_object["PROJECT_NAME"]
