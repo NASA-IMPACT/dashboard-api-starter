@@ -33,5 +33,5 @@ def test_site_id(app):
     _setup_s3()
     """test /sites/{id} endpoint"""
 
-    response = app.get("/v1/sites/be")
+    response = app.get("/v1/sites/taiga")
     assert response.status_code == 200

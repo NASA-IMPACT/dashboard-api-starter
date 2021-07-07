@@ -2,10 +2,8 @@
 
 
 import json
-from unittest.mock import patch
 
 import boto3
-import botocore
 from moto import mock_s3
 
 from dashboard_api.core.config import BUCKET
@@ -53,18 +51,15 @@ def test_datasets(app):
     assert response.status_code == 200
     content = json.loads(response.content)
 
-    assert "co2" in [d["id"] for d in content["datasets"]]
+    assert "ATL08" in [d["id"] for d in content["datasets"]]
 
 
 @mock_s3
 def test_spotlight_datasets(app):
     _setup_s3()
-    response = app.get("v1/datasets/tk")
+    response = app.get("v1/datasets/taiga")
 
     assert response.status_code == 200
-    content = json.loads(response.content)
-
-    assert "co2" in [d["id"] for d in content["datasets"]]
 
 
 @mock_s3
