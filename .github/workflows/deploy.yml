@@ -33,8 +33,9 @@ jobs:
           PROJECT_NAME: 'template-project'
           DATA_BUCKET: 'bucket-does-not-exist'
           STAGE: ${{ steps.extract_branch.outputs.branch }}
-          VECTOR_TILESERVER_URL: ''
-          TITILER_SERVER_URL: ''
+          STAC_API_URL: ''
+          VECTOR_TILESERVER_URL: 'https://mbtileserver.dev.maap-project.org/services'
+          TITILER_SERVER_URL: 'https://h9su0upami.execute-api.us-east-1.amazonaws.com'
         with:
           from_file: 'stack/config.yml.example'
           to_file: 'stack/config.yml'
