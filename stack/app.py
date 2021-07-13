@@ -165,7 +165,7 @@ class dashboardApiLambdaStack(core.Stack):
         return aws_lambda.Code.from_asset(
             path=os.path.abspath(code_dir),
             bundling=core.BundlingOptions(
-                image=core.BundlingDockerImage.from_asset(
+                image=core.DockerImage.from_build(
                     path=os.path.abspath(code_dir),
                     file="Dockerfiles/lambda/Dockerfile",
                 ),
