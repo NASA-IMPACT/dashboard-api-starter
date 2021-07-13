@@ -53,7 +53,7 @@ class DatasetManager(object):
 
     def get(self, spotlight_id: str, api_url: str) -> Datasets:
         """
-        Fetches all the datasets avilable for a given spotlight. If the
+        Fetches all the datasets available for a given spotlight. If the
         spotlight_id provided is "global" then this method will return
         all datasets that are NOT spotlight specific. Raises an
         `InvalidIdentifier` exception if the provided spotlight_id does
@@ -80,10 +80,9 @@ class DatasetManager(object):
             return Datasets(datasets=[dataset.dict() for dataset in global_datasets])
 
         # Verify that the requested spotlight exists
-        try:
-            site = sites.get(spotlight_id)
-        except InvalidIdentifier:
-            raise
+        site = sites.get(spotlight_id, api_url)
+        if not site:
+            raise InvalidIdentifier()
 
         spotlight_metadata = self._load_metadata_from_file().get(site.id)
         if spotlight_metadata:

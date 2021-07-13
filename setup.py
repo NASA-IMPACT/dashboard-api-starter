@@ -21,6 +21,7 @@ inst_reqs = [
     "requests",
     "mercantile",
     "pyyaml",
+    "cachetools"
 ]
 extra_reqs = {
     "dev": ["pytest", "pytest-cov", "pytest-asyncio", "pre-commit"],
