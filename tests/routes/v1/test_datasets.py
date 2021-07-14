@@ -51,13 +51,13 @@ def test_datasets(app):
     assert response.status_code == 200
     content = json.loads(response.content)
 
-    assert "ATL08" in [d["id"] for d in content["datasets"]]
+    assert "co2" in [d["id"] for d in content["datasets"]]
 
 
 @mock_s3
 def test_spotlight_datasets(app):
     _setup_s3()
-    response = app.get("v1/datasets/taiga")
+    response = app.get("v1/datasets/tk")
 
     assert response.status_code == 200
 
