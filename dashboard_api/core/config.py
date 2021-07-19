@@ -39,5 +39,9 @@ DATASET_METADATA_FILENAME = os.environ.get(
     "DATASET_METADATA_FILENAME", config_object["DATASET_METADATA_FILENAME"]
 )
 
+SITE_METADATA_FILENAME = os.environ.get(
+    "SITE_METADATA_FILENAME", config_object["SITE_METADATA_FILENAME"]
+)
+
 DT_FORMAT = "%Y-%m-%d"
 MT_FORMAT = "%Y%m"

@@ -33,6 +33,7 @@ jobs:
           PROJECT_NAME: 'template-project'
           DATA_BUCKET: 'bucket-does-not-exist'
           STAGE: ${{ steps.extract_branch.outputs.branch }}
+          STAC_API_URL: ''
           VECTOR_TILESERVER_URL: ''
           TITILER_SERVER_URL: ''
         with:
