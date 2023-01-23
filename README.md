@@ -1,5 +1,7 @@
 # dashboard-api-starter
 
+DEPRECATED in favor of https://github.com/NASA-IMPACT/delta-config and https://github.com/NASA-IMPACT/delta-ui
+
 A lightweight API for Earthdata.
 
 ## Contributing data
